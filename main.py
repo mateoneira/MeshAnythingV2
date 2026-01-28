@@ -33,6 +33,8 @@ class Dataset:
             for input_path in input_list:
                 # load ply
                 cur_data = trimesh.load(input_path)
+                #get number of faces
+                self.n_faces = len(cur_data.faces)
                 mesh_list.append(cur_data)
             if mc:
                 print("First Marching Cubes and then sample point cloud, need several minutes...")
@@ -49,7 +51,7 @@ class Dataset:
                 print(f"Saved pc_normal to {save_path} for future use.")
 
             for input_path, cur_data in zip(input_list, pc_list):
-                self.data.append({'pc_normal': cur_data, 'uid': input_path.split('/')[-1].split('.')[0]})
+                self.data.append({'pc_normal': cur_data, 'uid': input_path.split('/')[-1].split('.')[0], 'n_faces': self.n_faces})
         print(f"dataset total data samples: {len(self.data)}")
 
     def __len__(self):
@@ -58,6 +60,7 @@ class Dataset:
     def __getitem__(self, idx):
         data_dict = {}
         data_dict['pc_normal'] = self.data[idx]['pc_normal']
+        data_dict['n_faces'] = self.data[idx]['n_faces']
         # normalize pc coor
         pc_coor = data_dict['pc_normal'][:, :3]
         normals = data_dict['pc_normal'][:, 3:]
@@ -102,7 +105,7 @@ if __name__ == "__main__":
     # check if benchmark_file exists, if it doesn't, create one with the first line as header
     if not os.path.exists(benchmark_file):
         with open(benchmark_file, "w") as f:
-            f.write("input_name,duration, num_points_input, num_faces_out \n")
+            f.write("input_name, n_faces_in, duration, num_points_input, num_faces_out \n")
 
     args = get_args()
 
@@ -184,7 +187,7 @@ if __name__ == "__main__":
                 print(f"{save_path} Over!!")
                 # log to benchmark file
                 with open(benchmark_file, "a") as f:
-                    f.write(f"{batch_data_label['uid'][batch_id]},{time.time() - curr_time},{batch_data_label['pc_normal'].shape[1]},{num_faces}\n")
+                    f.write(f"{batch_data_label['uid'][batch_id]},{batch_data_label['n_faces'][batch_id]},{time.time() - curr_time},{batch_data_label['pc_normal'].shape[1]},{num_faces}\n")
                     
     end_time = time.time()
     print(f"Total time: {end_time - begin_time}")

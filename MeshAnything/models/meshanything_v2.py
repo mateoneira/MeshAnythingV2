@@ -22,7 +22,7 @@ class MeshAnythingV2(nn.Module, PyTorchModelHubMixin,
         self.n_max_triangles = 1600
         self.max_length = int(self.n_max_triangles * self.face_per_token * self.max_seq_ratio + 3 + self.cond_length) # add 1
 
-        self.coor_continuous_range = (-0.5, 0.5)
+        self.coor_continuous_range = (-0.995, 0.995)
 
         self.config = ShapeOPTConfig.from_pretrained(
             "facebook/opt-350m",

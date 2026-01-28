@@ -7,8 +7,8 @@
             "program": "${workspaceFolder}/main.py",
             "console": "integratedTerminal",
             "args": [
-                "--input_path",
-                "examples/test.obj",
+                "--input_dir",
+                "examples",
                 "--out_dir",
                 "mesh_output",
                 "--input_type",
