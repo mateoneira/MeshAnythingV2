@@ -36,6 +36,17 @@ class Dataset:
             if mc:
                 print("First Marching Cubes and then sample point cloud, need several minutes...")
             pc_list, _ = process_mesh_to_pc(mesh_list, marching_cubes=mc, mc_level=mc_level)
+
+            # save pc_normal data to .npy for future use
+            #check first if folder 'pc_normal_cache' exists
+            if not os.path.exists('pc_normal_cache'):
+                os.makedirs('pc_normal_cache')
+            
+            for input_path, cur_pc in zip(input_list, pc_list):
+                save_path = os.path.join('pc_normal_cache', input_path.split('/')[-1].split('.')[0] + '_pc_normal.npy')
+                np.save(save_path, cur_pc)
+                print(f"Saved pc_normal to {save_path} for future use.")
+
             for input_path, cur_data in zip(input_list, pc_list):
                 self.data.append({'pc_normal': cur_data, 'uid': input_path.split('/')[-1].split('.')[0]})
         print(f"dataset total data samples: {len(self.data)}")
@@ -85,6 +96,13 @@ def get_args():
     return args
 
 if __name__ == "__main__":
+
+    benchmark_file = "benchmark.csv"
+    # check if benchmark_file exists, if it doesn't, create one with the first line as header
+    if not os.path.exists(benchmark_file):
+        with open(benchmark_file, "w") as f:
+            f.write("input_name,duration, num_points_input, num_faces_out \n")
+
     args = get_args()
 
     cur_time = datetime.datetime.now().strftime("%d_%H-%M-%S")
@@ -158,5 +176,9 @@ if __name__ == "__main__":
                 scene_mesh.visual.face_colors = face_colors
                 scene_mesh.export(save_path)
                 print(f"{save_path} Over!!")
+                # log to benchmark file
+                with open(benchmark_file, "a") as f:
+                    f.write(f"{batch_data_label['uid'][batch_id]},{time.time() - curr_time},{batch_data_label['pc_normal'].shape[1]},{num_faces}\n")
+                    
     end_time = time.time()
     print(f"Total time: {end_time - begin_time}")
