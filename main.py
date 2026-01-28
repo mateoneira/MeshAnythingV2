@@ -8,6 +8,7 @@ from accelerate import Accelerator
 from accelerate.utils import set_seed
 from accelerate.utils import DistributedDataParallelKwargs
 from safetensors.torch import load_model
+from mesh_to_pc import export_to_watertight
 
 from mesh_to_pc import process_mesh_to_pc
 from huggingface_hub import hf_hub_download
@@ -148,6 +149,8 @@ if __name__ == "__main__":
     with accelerator.autocast():
         for curr_iter, batch_data_label in enumerate(dataloader):
             curr_time = time.time()
+            #save pc_normal to disk for checking
+            np.save("pc_normal_cache/pc_normal_test_1.npy", batch_data_label['pc_normal'][0].cpu().numpy())
             outputs = model(batch_data_label['pc_normal'], sampling=args.sampling)
             batch_size = outputs.shape[0]
             device = outputs.device
@@ -158,6 +161,8 @@ if __name__ == "__main__":
                 recon_mesh = recon_mesh[valid_mask]  # nvalid_face x 3 x 3
 
                 vertices = recon_mesh.reshape(-1, 3).cpu()
+                #save vertices to disk for checking
+                np.save("pc_normal_cache/vertices_test_1.npy", vertices.numpy())
                 vertices_index = np.arange(len(vertices))  # 0, 1, ..., 3 x face
                 triangles = vertices_index.reshape(-1, 3)
 
@@ -168,6 +173,7 @@ if __name__ == "__main__":
                 scene_mesh.update_faces(scene_mesh.unique_faces())
                 scene_mesh.remove_unreferenced_vertices()
                 scene_mesh.fix_normals()
+                # scene_mesh = export_to_watertight(scene_mesh, octree_depth=7)
                 save_path = os.path.join(checkpoint_dir, f'{batch_data_label["uid"][batch_id]}_gen.obj')
                 num_faces = len(scene_mesh.faces)
                 brown_color = np.array([255, 165, 0, 255], dtype=np.uint8)

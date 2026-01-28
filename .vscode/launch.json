@@ -1,0 +1,32 @@
+{
+    "configurations": [
+        {
+            "name": "Python Debugger: main.py",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/main.py",
+            "console": "integratedTerminal",
+            "args": [
+                "--input_path",
+                "examples/test.obj",
+                "--out_dir",
+                "mesh_output",
+                "--input_type",
+                "mesh"
+            ]
+        },
+        {
+            "name": "Python Debugger: scale_mesh.py",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/scale_mesh.py",
+            "console": "integratedTerminal",
+            "args": [
+                "--input_mesh",
+                "examples/test.obj",
+                "--output_mesh",
+                "mesh_output/test_scaled.obj",
+            ]
+        },
+    ]
+}

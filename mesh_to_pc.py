@@ -45,6 +45,8 @@ def process_mesh_to_pc(mesh_list, marching_cubes = False, sample_num = 8192, mc_
         if marching_cubes:
             cur_time = time.time()
             mesh = export_to_watertight(mesh, octree_depth=mc_level)
+            #save watertight mesh to ply for checking
+            # mesh.export("watertight_mesh.ply")
             print("MC over! ", "mc_level: ", mc_level, "process_time:" , time.time() - cur_time)
         return_mesh_list.append(mesh)
         points, face_idx = mesh.sample(sample_num, return_index=True)
